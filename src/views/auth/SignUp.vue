@@ -1,0 +1,72 @@
+<template>
+     <div class="container py-5 my-3">
+    <div class="row justify-content-center">
+      <div class="col-md-6 col-lg-4 border rounded">
+        <div class="shadow-sm">
+          <div class="card-body p-4">
+            <h4 class="text-center mb-4">Create Account</h4>
+            <form @submit.prevent="handleSignUp">
+              <div class="mb-3">
+                <label for="email" class="form-label">Email</label>
+                <input v-model="form.email" type="email" class="form-control" id="email" required />
+              </div>
+              <div class="mb-4">
+                <label for="password" class="form-label">Password</label>
+                <input
+                  v-model="form.password"
+                  type="password"
+                  class="form-control"
+                  id="password"
+                  required
+                />
+              </div>
+              <button :disabled="authStore.isLoading" type="submit" class="btn w-100" style="background-color: #6f42c1; color: white;">
+                <span v-if="authStore.isLoading" class="spinner-border spinner-border-sm me-2"></span>
+                Create Account
+              </button>
+              <div v-if="error" class="alert alert-danger mt-3 mb-0">{{ error }}</div>
+            </form>
+            <p class="mt-3 form-label text-center">
+              Already have an account?
+              <router-link :to="{name:APP_ROUTE_NAMES.SIGN_IN}">Login here </router-link>
+            </p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</template>
+
+<script setup>
+import { useRouter } from 'vue-router';
+import { APP_ROUTE_NAMES } from '@/constants/routeNames';
+const router=useRouter();
+import { useSwal } from '@/composibles/useSwal';
+const {showSuccess,showError}=useSwal();
+import { reactive, ref } from 'vue';
+import { useAuthStore } from '@/stores/authStore';
+const authStore =useAuthStore();
+
+const error=ref("");
+const form=reactive({
+  email:"",
+  password:"",
+});
+
+const handleSignUp = async() => {
+   try{
+    error.value="";
+    console.log(form);
+    await authStore.signUpUser(form.email,form.password); 
+    showSuccess("Account created successfully")
+    form.email='';
+    form.password='';
+  }
+  catch(e){
+    error.value=e.message;
+    showError(e.message)
+  }
+}
+
+
+</script>
